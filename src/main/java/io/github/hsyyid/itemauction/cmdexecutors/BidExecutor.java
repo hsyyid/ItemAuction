@@ -1,0 +1,101 @@
+package io.github.hsyyid.itemauction.cmdexecutors;
+
+import io.github.hsyyid.itemauction.Main;
+import io.github.hsyyid.itemauction.events.BidEvent;
+import io.github.hsyyid.itemauction.utils.Auction;
+import io.github.hsyyid.itemauction.utils.Bid;
+import io.github.hsyyid.itemauction.utils.Utils;
+
+import org.spongepowered.api.Game;
+import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.command.CommandException;
+import org.spongepowered.api.util.command.CommandResult;
+import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.args.CommandContext;
+import org.spongepowered.api.util.command.source.CommandBlockSource;
+import org.spongepowered.api.util.command.source.ConsoleSource;
+import org.spongepowered.api.util.command.spec.CommandExecutor;
+
+public class BidExecutor implements CommandExecutor
+{
+	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
+	{
+		Game game = Main.game;
+		Player auctioner = ctx.<Player> getOne("player").get();
+		int price = ctx.<Integer> getOne("price").get();
+
+		if (src instanceof Player)
+		{
+			Player player = (Player) src;
+			Auction bidOnAuction = null;
+
+			if (price < 0)
+			{
+				src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid a negative number!"));
+				return CommandResult.success();
+			}
+
+			for (Auction auction : Main.auctions)
+			{
+				boolean alreadyBid = false;
+				for (Bid bid : auction.getBids())
+				{
+					if (bid.getBidder() == player)
+					{
+						alreadyBid = true;
+						break;
+					}
+				}
+				boolean isPlayerBidingOnOwnAuction = (auctioner == player);
+				if (!alreadyBid && auction.getSender() == auctioner && !isPlayerBidingOnOwnAuction)
+				{
+					bidOnAuction = auction;
+					break;
+				}
+				else if (alreadyBid)
+				{
+					src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid multiple times!"));
+					return CommandResult.success();
+				}
+				else if (isPlayerBidingOnOwnAuction)
+				{
+					src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid on your own auction!"));
+					return CommandResult.success();
+				}
+			}
+
+			boolean hasEnoughMoney = false;
+
+			if (Utils.isPlayerInConfig(player.getUniqueId().toString()))
+			{
+				hasEnoughMoney = Utils.getBalance(player.getUniqueId().toString()) > price;
+			}
+
+			if (hasEnoughMoney && bidOnAuction != null)
+			{
+				game.getEventManager().post(new BidEvent(player, price, bidOnAuction));
+				src.sendMessage(Texts.of(TextColors.GREEN, "Success! ", TextColors.WHITE, "Bid sent."));
+			}
+			else if (!hasEnoughMoney)
+			{
+				src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have enough money to create a bid for that sum of money!"));
+				return CommandResult.success();
+			}
+			else
+			{
+				src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Auction not found!"));
+			}
+		}
+		else if (src instanceof ConsoleSource)
+		{
+			src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /bid!"));
+		}
+		else if (src instanceof CommandBlockSource)
+		{
+			src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /bid!"));
+		}
+		return CommandResult.success();
+	}
+}
