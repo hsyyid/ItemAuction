@@ -72,7 +72,6 @@ public class Main
 			{
 				dConfig.createNewFile();
 				config = confManager.load();
-				config.getNode("home", "users", "HassanS6000", "home", "X").setValue(0);
 				confManager.save(config);
 			}
 			configurationManager = confManager;
