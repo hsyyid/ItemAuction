@@ -4,7 +4,6 @@ import io.github.hsyyid.itemauction.Main;
 import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.utils.Auction;
 import io.github.hsyyid.itemauction.utils.Bid;
-import io.github.hsyyid.itemauction.utils.Utils;
 
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.player.Player;
@@ -17,6 +16,9 @@ import org.spongepowered.api.util.command.args.CommandContext;
 import org.spongepowered.api.util.command.source.CommandBlockSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.util.command.spec.CommandExecutor;
+
+import com.erigitic.config.AccountManager;
+import com.erigitic.main.TotalEconomy;
 
 public class BidExecutor implements CommandExecutor
 {
@@ -67,11 +69,10 @@ public class BidExecutor implements CommandExecutor
 			}
 
 			boolean hasEnoughMoney = false;
+			TotalEconomy totalEconomy = (TotalEconomy) Main.game.getPluginManager().getPlugin("TotalEconomy").get().getInstance();
+			AccountManager accountManager = totalEconomy.getAccountManager();
 
-			if (Utils.isPlayerInConfig(player.getUniqueId().toString()))
-			{
-				hasEnoughMoney = Utils.getBalance(player.getUniqueId().toString()) > price;
-			}
+			hasEnoughMoney = accountManager.getBalance(player).intValue() > price;
 
 			if (hasEnoughMoney && bidOnAuction != null)
 			{

@@ -2,13 +2,11 @@ package io.github.hsyyid.itemauction;
 
 import io.github.hsyyid.itemauction.cmdexecutors.AcceptBidExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.AuctionExecutor;
-import io.github.hsyyid.itemauction.cmdexecutors.BalanceExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.BidExecutor;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.utils.Auction;
 import io.github.hsyyid.itemauction.utils.Bid;
-import io.github.hsyyid.itemauction.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +32,7 @@ import org.spongepowered.api.world.TeleportHelper;
 
 import com.google.inject.Inject;
 
-@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.1")
+@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.1", dependencies = "required-after:TotalEconomy")
 public class Main
 {
 	public static Game game = null;
@@ -92,14 +90,6 @@ public class Main
 
 		game.getCommandDispatcher().register(this, auctionCommandSpec, "auction");
 		
-		CommandSpec balanceCommandSpec = CommandSpec.builder()
-			.description(Texts.of("Balance Command"))
-			.permission("balance.use")
-			.executor(new BalanceExecutor())
-			.build();
-
-		game.getCommandDispatcher().register(this, balanceCommandSpec, "balance", "bal");
-		
 		CommandSpec acceptBidCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Accept Bid Command"))
 			.permission("bid.accept")
@@ -132,16 +122,6 @@ public class Main
 	{
 		Auction auction = new Auction(event.getSender(), event.getPrice(), event.getItemStack().getQuantity(), event.getItemStack());
 		auctions.add(auction);
-	}
-	
-	@Subscribe
-	public void onPlayerJoin(PlayerJoinEvent event)
-	{
-		Player player = event.getEntity();
-		if(!(Utils.isPlayerInConfig(player.getUniqueId().toString())))
-		{
-			Utils.addPlayerToConfig(player.getUniqueId().toString());
-		}
 	}
 	
 	@Subscribe
