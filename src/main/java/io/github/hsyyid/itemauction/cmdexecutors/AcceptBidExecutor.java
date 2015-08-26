@@ -1,16 +1,13 @@
 package io.github.hsyyid.itemauction.cmdexecutors;
 
-import java.math.BigDecimal;
-
 import io.github.hsyyid.itemauction.Main;
-import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.utils.Auction;
 import io.github.hsyyid.itemauction.utils.Bid;
 
-import org.spongepowered.api.Game;
+import java.math.BigDecimal;
+
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.command.CommandException;
@@ -23,7 +20,6 @@ import org.spongepowered.api.util.command.spec.CommandExecutor;
 
 import com.erigitic.config.AccountManager;
 import com.erigitic.main.TotalEconomy;
-import com.google.common.base.Optional;
 
 public class AcceptBidExecutor implements CommandExecutor
 {
@@ -70,8 +66,8 @@ public class AcceptBidExecutor implements CommandExecutor
 				AccountManager accountManager = totalEconomy.getAccountManager();
 
 				BigDecimal price = new BigDecimal(endedBid.getPrice());
-				accountManager.removeFromBalance(bidder, price);
-				accountManager.addToBalance(player, price, true);	
+				accountManager.removeFromBalance(bidder.getUniqueId(), price);
+				accountManager.addToBalance(player.getUniqueId(), price, true);	
 
 				src.sendMessage(Texts.of(TextColors.GREEN, "Success! ", TextColors.WHITE, "Bid accepted."));
 			}

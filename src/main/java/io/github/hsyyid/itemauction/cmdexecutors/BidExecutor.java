@@ -72,7 +72,7 @@ public class BidExecutor implements CommandExecutor
 			TotalEconomy totalEconomy = (TotalEconomy) Main.game.getPluginManager().getPlugin("TotalEconomy").get().getInstance();
 			AccountManager accountManager = totalEconomy.getAccountManager();
 
-			hasEnoughMoney = accountManager.getBalance(player).intValue() > price;
+			hasEnoughMoney = accountManager.getBalance(player.getUniqueId()).intValue() > price;
 
 			if (hasEnoughMoney && bidOnAuction != null)
 			{

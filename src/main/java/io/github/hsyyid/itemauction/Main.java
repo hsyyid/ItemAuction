@@ -32,7 +32,7 @@ import org.spongepowered.api.world.TeleportHelper;
 
 import com.google.inject.Inject;
 
-@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.1", dependencies = "required-after:TotalEconomy")
+@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.2", dependencies = "required-after:TotalEconomy")
 public class Main
 {
 	public static Game game = null;
