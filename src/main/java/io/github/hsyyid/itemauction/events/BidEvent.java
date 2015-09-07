@@ -2,9 +2,9 @@ package io.github.hsyyid.itemauction.events;
 
 import io.github.hsyyid.itemauction.utils.Auction;
 
-import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.event.AbstractEvent;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.impl.AbstractEvent;
 
 public class BidEvent extends AbstractEvent implements Cancellable
 {

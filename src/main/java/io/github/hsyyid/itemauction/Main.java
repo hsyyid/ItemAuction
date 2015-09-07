@@ -18,10 +18,9 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.event.Subscribe;
-import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
-import org.spongepowered.api.event.state.ServerStartedEvent;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.config.DefaultConfig;
 import org.spongepowered.api.text.Texts;
@@ -57,8 +56,8 @@ public class Main
 	@DefaultConfig(sharedRoot = true)
 	private ConfigurationLoader<CommentedConfigurationNode> confManager;
 
-	@Subscribe
-	public void onServerStart(ServerStartedEvent event)
+	@Listener
+	public void onServerStart(GameStartedServerEvent event)
 	{
 		getLogger().info("ItemAuction loading...");
 		game = event.getGame();
@@ -117,14 +116,14 @@ public class Main
 			getLogger().info("ItemAuction loaded!");
 	}
 
-	@Subscribe
+	@Listener
 	public void auctionEventHandler(AuctionEvent event)
 	{
 		Auction auction = new Auction(event.getSender(), event.getPrice(), event.getItemStack().getQuantity(), event.getItemStack());
 		auctions.add(auction);
 	}
 	
-	@Subscribe
+	@Listener
 	public void bidEventHandler(BidEvent event)
 	{
 		Auction auction = event.getAuction();

@@ -2,7 +2,7 @@ package io.github.hsyyid.itemauction.utils;
 
 import java.util.ArrayList;
 
-import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 public class Auction

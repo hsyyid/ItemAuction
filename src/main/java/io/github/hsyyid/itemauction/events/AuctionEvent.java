@@ -1,8 +1,8 @@
 package io.github.hsyyid.itemauction.events;
 
-import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.event.AbstractEvent;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 public class AuctionEvent extends AbstractEvent implements Cancellable
