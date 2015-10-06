@@ -2,7 +2,6 @@ package io.github.hsyyid.itemauction.cmdexecutors;
 
 import io.github.hsyyid.itemauction.Main;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
-
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
@@ -17,7 +16,7 @@ import org.spongepowered.api.util.command.source.CommandBlockSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.util.command.spec.CommandExecutor;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public class AuctionExecutor implements CommandExecutor
 {
@@ -36,7 +35,8 @@ public class AuctionExecutor implements CommandExecutor
 			Player player = (Player) src;
 			Optional<ItemStack> optionalItemInHand = player.getItemInHand();
 			ItemStack itemInHand = null;
-			if (optionalItemInHand != Optional.<ItemStack> absent())
+			
+			if (optionalItemInHand.isPresent())
 			{
 				itemInHand = optionalItemInHand.get();
 				game.getEventManager().post(new AuctionEvent(player, itemInHand, price));
