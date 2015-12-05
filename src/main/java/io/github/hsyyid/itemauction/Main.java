@@ -1,5 +1,6 @@
 package io.github.hsyyid.itemauction;
 
+import com.google.inject.Inject;
 import io.github.hsyyid.itemauction.cmdexecutors.AcceptBidExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.AuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.BidExecutor;
@@ -7,29 +8,25 @@ import io.github.hsyyid.itemauction.events.AuctionEvent;
 import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.utils.Auction;
 import io.github.hsyyid.itemauction.utils.Bid;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.slf4j.Logger;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.TeleportHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-
-import org.slf4j.Logger;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.service.config.DefaultConfig;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.args.GenericArguments;
-import org.spongepowered.api.util.command.spec.CommandSpec;
-import org.spongepowered.api.world.TeleportHelper;
-
-import com.google.inject.Inject;
 
 @Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.3", dependencies = "required-after:TotalEconomy")
 public class Main
@@ -57,7 +54,7 @@ public class Main
 	private ConfigurationLoader<CommentedConfigurationNode> confManager;
 
 	@Listener
-	public void onServerStart(GameStartedServerEvent event)
+	public void onServerInit(GameInitializationEvent event)
 	{
 		getLogger().info("ItemAuction loading...");
 		game = event.getGame();
@@ -87,7 +84,7 @@ public class Main
 			.executor(new AuctionExecutor())
 			.build();
 
-		game.getCommandDispatcher().register(this, auctionCommandSpec, "auction");
+		game.getCommandManager().register(this, auctionCommandSpec, "auction");
 		
 		CommandSpec acceptBidCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Accept Bid Command"))
@@ -96,7 +93,7 @@ public class Main
 			.executor(new AcceptBidExecutor())
 			.build();
 
-		game.getCommandDispatcher().register(this, acceptBidCommandSpec, "acceptbid");
+		game.getCommandManager().register(this, acceptBidCommandSpec, "acceptbid");
 
 		CommandSpec bidCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Bid Command"))
@@ -107,7 +104,7 @@ public class Main
 						.executor(new BidExecutor())
 						.build();
 
-			game.getCommandDispatcher().register(this, bidCommandSpec, "bid");
+			game.getCommandManager().register(this, bidCommandSpec, "bid");
 
 			getLogger().info("-----------------------------");
 			getLogger().info("ItemAuction was made by HassanS6000!");
