@@ -61,7 +61,7 @@ public class AcceptBidExecutor implements CommandExecutor
 				bidder.sendMessage(Texts.of(TextColors.GREEN, "[ItemAuction] ", TextColors.WHITE, "Your bid was accepted by " + player.getName() + "."));
 				bidder.setItemInHand(endedAuction.getItemStack());
 
-				TotalEconomy totalEconomy = (TotalEconomy) Main.game.getPluginManager().getPlugin("TotalEconomy").get().getInstance();
+				TotalEconomy totalEconomy = (TotalEconomy) Main.game.getPluginManager().getPlugin("TotalEconomy").get();
 				AccountManager accountManager = totalEconomy.getAccountManager();
 
 				BigDecimal price = new BigDecimal(endedBid.getPrice());
