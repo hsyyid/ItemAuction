@@ -90,7 +90,7 @@ public class Main
 		CommandSpec acceptBidCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Accept Bid Command"))
 			.permission("bid.accept")
-			.arguments(GenericArguments.onlyOne(GenericArguments.player(Texts.of("player"), game)))
+			.arguments(GenericArguments.onlyOne(GenericArguments.player(Texts.of("player"))))
 			.executor(new AcceptBidExecutor())
 			.build();
 
@@ -100,7 +100,7 @@ public class Main
 			.description(Texts.of("Bid Command"))
 			.permission("bid.use")
 			.arguments(GenericArguments.seq(
-						GenericArguments.onlyOne(GenericArguments.player(Texts.of("player"), game))),
+						GenericArguments.onlyOne(GenericArguments.player(Texts.of("player")))),
 						GenericArguments.onlyOne(GenericArguments.integer(Texts.of("price"))))
 						.executor(new BidExecutor())
 						.build();
