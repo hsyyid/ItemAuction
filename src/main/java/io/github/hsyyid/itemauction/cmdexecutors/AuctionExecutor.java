@@ -1,6 +1,6 @@
 package io.github.hsyyid.itemauction.cmdexecutors;
 
-import io.github.hsyyid.itemauction.Main;
+import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
@@ -13,7 +13,7 @@ import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
@@ -22,14 +22,14 @@ public class AuctionExecutor implements CommandExecutor
 {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
-		Game game = Main.game;
+		Game game = ItemAuction.game;
 		Server server = game.getServer();
 		int price = ctx.<Integer> getOne("price").get();
 		if (src instanceof Player)
 		{
 			if (price < 0)
 			{
-				src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot create an auction with a negative number!"));
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot create an auction with a negative number!"));
 				return CommandResult.success();
 			}
 			
@@ -43,22 +43,22 @@ public class AuctionExecutor implements CommandExecutor
 				game.getEventManager().post(new AuctionEvent(player, itemInHand, price));
 				for (Player p : server.getOnlinePlayers())
 				{
-					p.sendMessage(Texts.of(TextColors.GREEN, "[ItemAuction] ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + itemInHand.getQuantity() + " ", itemInHand.getItem().getName(), " for " + price + " dollars."));
+					p.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + itemInHand.getQuantity() + " ", itemInHand.getItem().getName(), " for " + price + " dollars."));
 				}
 			}
 			else
 			{
-				src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You aren't holding anything!"));
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You aren't holding anything!"));
 				return CommandResult.success();
 			}
 		}
 		else if (src instanceof ConsoleSource)
 		{
-			src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /auction!"));
+			src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /auction!"));
 		}
 		else if (src instanceof CommandBlockSource)
 		{
-			src.sendMessage(Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /auction!"));
+			src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /auction!"));
 		}
 
 		return CommandResult.success();

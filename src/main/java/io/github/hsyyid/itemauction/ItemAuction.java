@@ -21,7 +21,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.TeleportHelper;
 
@@ -29,8 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.3", dependencies = "required-after:TotalEconomy")
-public class Main
+@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.4", dependencies = "required-after:TotalEconomy")
+public class ItemAuction
 {
 	public static Game game = null;
 	public static ConfigurationNode config = null;
@@ -79,29 +79,29 @@ public class Main
 		}
 
 		CommandSpec auctionCommandSpec = CommandSpec.builder()
-			.description(Texts.of("Auction Command"))
+			.description(Text.of("Auction Command"))
 			.permission("auction.use")
-			.arguments(GenericArguments.onlyOne(GenericArguments.integer(Texts.of("price"))))
+			.arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("price"))))
 			.executor(new AuctionExecutor())
 			.build();
 
 		game.getCommandManager().register(this, auctionCommandSpec, "auction");
 		
 		CommandSpec acceptBidCommandSpec = CommandSpec.builder()
-			.description(Texts.of("Accept Bid Command"))
+			.description(Text.of("Accept Bid Command"))
 			.permission("bid.accept")
-			.arguments(GenericArguments.onlyOne(GenericArguments.player(Texts.of("player"))))
+			.arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
 			.executor(new AcceptBidExecutor())
 			.build();
 
 		game.getCommandManager().register(this, acceptBidCommandSpec, "acceptbid");
 
 		CommandSpec bidCommandSpec = CommandSpec.builder()
-			.description(Texts.of("Bid Command"))
+			.description(Text.of("Bid Command"))
 			.permission("bid.use")
 			.arguments(GenericArguments.seq(
-						GenericArguments.onlyOne(GenericArguments.player(Texts.of("player")))),
-						GenericArguments.onlyOne(GenericArguments.integer(Texts.of("price"))))
+						GenericArguments.onlyOne(GenericArguments.player(Text.of("player")))),
+						GenericArguments.onlyOne(GenericArguments.integer(Text.of("price"))))
 						.executor(new BidExecutor())
 						.build();
 
@@ -133,8 +133,8 @@ public class Main
 		auction.addBid(bid);
 		auctions.add(auction);
 		
-		auction.getSender().sendMessage(Texts.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + price + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getItem().getName()));
-		auction.getSender().sendMessage(Texts.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /acceptbid " + bidder.getName() + " to accept this bid."));
+		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + price + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getItem().getName()));
+		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /acceptbid " + bidder.getName() + " to accept this bid."));
 	}
 	
 	public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
