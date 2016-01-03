@@ -20,7 +20,9 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.TeleportHelper;
@@ -28,12 +30,14 @@ import org.spongepowered.api.world.TeleportHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 
-@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.4", dependencies = "required-after:TotalEconomy")
+@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.4")
 public class ItemAuction
 {
-	public static Game game = null;
-	public static ConfigurationNode config = null;
+	public static EconomyService economyService;
+	public static Game game;
+	public static ConfigurationNode config;
 	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
 	public static TeleportHelper helper;
 	public static ArrayList<Auction> auctions = new ArrayList<Auction>();
@@ -58,6 +62,7 @@ public class ItemAuction
 	public void onServerInit(GameInitializationEvent event)
 	{
 		getLogger().info("ItemAuction loading...");
+		
 		game = Sponge.getGame();
 		helper = game.getTeleportHelper();
 		// Config File
@@ -112,6 +117,21 @@ public class ItemAuction
 			getLogger().info("Have fun, and enjoy! :D");
 			getLogger().info("-----------------------------");
 			getLogger().info("ItemAuction loaded!");
+	}
+	
+	@Listener
+	public void onPostInit(GamePostInitializationEvent event)
+	{
+		Optional<EconomyService> optionalEconomyService = Sponge.getServiceManager().provide(EconomyService.class);
+		
+		if(optionalEconomyService.isPresent())
+		{
+			economyService = optionalEconomyService.get();
+		}
+		else
+		{
+			getLogger().error("Error! This plugin requires an economy plugin to be installed!");
+		}
 	}
 
 	@Listener
