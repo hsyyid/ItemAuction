@@ -1,5 +1,6 @@
 package io.github.hsyyid.itemauction.cmdexecutors;
 
+import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -21,23 +22,29 @@ public class AuctionExecutor implements CommandExecutor
 
 		if (src instanceof Player)
 		{
+			Player player = (Player) src;
 			if (price < 0)
 			{
 				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot create an auction with a negative price!"));
 				return CommandResult.success();
 			}
 
-			Player player = (Player) src;
-
-			if (player.getItemInHand().isPresent())
+			if (!ItemAuction.auctions.stream().filter(a -> a.getSender().getUniqueId() == player.getUniqueId()).findAny().isPresent())
 			{
-				ItemStack stack = player.getItemInHand().get();
-				Sponge.getEventManager().post(new AuctionEvent(player, stack, price));
-				MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getItem().getTranslation().get(), " for " + price + " dollars."));
+				if (player.getItemInHand().isPresent())
+				{
+					ItemStack stack = player.getItemInHand().get();
+					Sponge.getEventManager().post(new AuctionEvent(player, stack, price));
+					MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getItem().getTranslation().get(), " for " + price + " dollars."));
+				}
+				else
+				{
+					src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You aren't holding anything!"));
+				}
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You aren't holding anything!"));
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You are already auctioning something!"));
 			}
 		}
 		else
