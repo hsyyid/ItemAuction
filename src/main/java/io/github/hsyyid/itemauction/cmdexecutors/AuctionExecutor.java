@@ -35,7 +35,7 @@ public class AuctionExecutor implements CommandExecutor
 				{
 					ItemStack stack = player.getItemInHand().get();
 					Sponge.getEventManager().post(new AuctionEvent(player, stack, price));
-					MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getItem().getTranslation().get(), " for " + price + " dollars."));
+					MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getTranslation().get(), " for " + price + " dollars."));
 				}
 				else
 				{

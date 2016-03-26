@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6")
+@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.1")
 public class ItemAuction
 {
 	public static EconomyService economyService;
@@ -59,7 +59,7 @@ public class ItemAuction
 			.executor(new AuctionExecutor())
 			.build());
 
-		subcommands.put(Arrays.asList("cancelauction", "cauc", "cancelauc", "end"), CommandSpec.builder()
+		subcommands.put(Arrays.asList("cancelauction", "cauc", "cancelauc"), CommandSpec.builder()
 			.description(Text.of("Cancel Auction Command"))
 			.permission("itemauction.command.cancelauction")
 			.executor(new CancelAuctionExecutor())
@@ -122,13 +122,16 @@ public class ItemAuction
 	{
 		Auction auction = event.getAuction();
 		Player bidder = event.getBidder();
-
 		Bid bid = new Bid(bidder, new BigDecimal(event.getPrice()), auction);
-		auctions.remove(auction);
-		auction.addBid(bid);
-		auctions.add(auction);
+		ItemAuction.auctions.remove(auction);
 
-		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + event.getPrice() + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getItem().getName()));
-		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /acceptbid " + bidder.getName() + " to accept this bid."));
+		// Remove old bids
+		auction.getBids().removeIf(b -> b.getBidder().getUniqueId() == bidder.getUniqueId());
+		// Add new bid
+		auction.addBid(bid);
+		ItemAuction.auctions.add(auction);
+
+		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + event.getPrice() + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getTranslation().get()));
+		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /ia acceptbid " + bidder.getName() + " to accept this bid."));
 	}
 }

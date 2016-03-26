@@ -35,7 +35,7 @@ public class AcceptBidExecutor implements CommandExecutor
 			{
 				Optional<Bid> bid = auction.get().getBids().stream().filter(b -> b.getBidder().getUniqueId() == bidder.getUniqueId()).findAny();
 
-				if (bid.isPresent() && player.getItemInHand().isPresent() && player.getItemInHand().get() == auction.get().getItemStack())
+				if (bid.isPresent() && player.getItemInHand().isPresent() && player.getItemInHand().get().getQuantity() == auction.get().getItemStack().getQuantity() && player.getItemInHand().get().getItem() == auction.get().getItemStack().getItem())
 				{
 					TransactionResult transactionResult = ItemAuction.economyService.getOrCreateAccount(bidder.getUniqueId()).get().transfer(ItemAuction.economyService.getOrCreateAccount(player.getUniqueId()).get(), ItemAuction.economyService.getDefaultCurrency(), bid.get().getPrice(), Cause.of(NamedCause.source(player)));
 
@@ -53,7 +53,7 @@ public class AcceptBidExecutor implements CommandExecutor
 						src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Bidder does not have enough money!"));
 					}
 				}
-				else if (!player.getItemInHand().isPresent() || player.getItemInHand().get() == auction.get().getItemStack())
+				else if (bid.isPresent())
 				{
 					src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You are not holding the item(s) for the auction!"));
 				}

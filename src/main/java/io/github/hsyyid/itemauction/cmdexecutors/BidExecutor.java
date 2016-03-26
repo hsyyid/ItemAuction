@@ -40,7 +40,6 @@ public class BidExecutor implements CommandExecutor
 
 				if (hasEnoughMoney)
 				{
-					auction.get().getBids().removeIf(b -> b.getBidder().getUniqueId() == player.getUniqueId());
 					Sponge.getEventManager().post(new BidEvent(player, price, auction.get()));
 					src.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Bid sent."));
 				}
