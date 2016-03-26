@@ -45,7 +45,7 @@ public class AcceptBidExecutor implements CommandExecutor
 						MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, player.getName() + " auction for " + auction.get().getQuantity() + " " + auction.get().getItemStack().getItem().getTranslation().get() + " has ended."));
 						bidder.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Your bid was accepted by " + player.getName() + "."));
 						player.setItemInHand(null);
-						bidder.setItemInHand(auction.get().getItemStack());
+						bidder.getInventory().offer(auction.get().getItemStack());
 						src.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Bid accepted."));
 					}
 					else
