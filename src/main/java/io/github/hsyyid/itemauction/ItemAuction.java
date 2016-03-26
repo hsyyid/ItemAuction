@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import io.github.hsyyid.itemauction.cmdexecutors.AcceptBidExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.AuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.BidExecutor;
+import io.github.hsyyid.itemauction.cmdexecutors.CancelAuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.ItemAuctionExecutor;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import io.github.hsyyid.itemauction.events.BidEvent;
@@ -56,6 +57,12 @@ public class ItemAuction
 			.permission("itemauction.command.auction")
 			.arguments(GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("price"))))
 			.executor(new AuctionExecutor())
+			.build());
+
+		subcommands.put(Arrays.asList("cancelauction", "cauc", "cancelauc", "end"), CommandSpec.builder()
+			.description(Text.of("Cancel Auction Command"))
+			.permission("itemauction.command.cancelauction")
+			.executor(new CancelAuctionExecutor())
 			.build());
 
 		subcommands.put(Arrays.asList("acceptbid"), CommandSpec.builder()
