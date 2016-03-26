@@ -2,8 +2,7 @@ package io.github.hsyyid.itemauction.cmdexecutors;
 
 import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.events.BidEvent;
-import io.github.hsyyid.itemauction.utils.Auction;
-import io.github.hsyyid.itemauction.utils.Bid;
+import io.github.hsyyid.itemauction.util.Auction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -15,18 +14,19 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public class BidExecutor implements CommandExecutor
 {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
-		Player auctioner = ctx.<Player> getOne("player").get();
-		int price = ctx.<Integer> getOne("price").get();
+		Player auctioneer = ctx.<Player> getOne("player").get();
+		double price = ctx.<Double> getOne("price").get();
 
 		if (src instanceof Player)
 		{
 			Player player = (Player) src;
-			Auction bidOnAuction = null;
+			Optional<Auction> auction = ItemAuction.auctions.stream().filter(a -> a.getSender().getUniqueId() == auctioneer.getUniqueId()).findAny();
 
 			if (price < 0)
 			{
@@ -34,50 +34,29 @@ public class BidExecutor implements CommandExecutor
 				return CommandResult.success();
 			}
 
-			for (Auction auction : ItemAuction.auctions)
+			if (auction.isPresent() && auctioneer.getUniqueId() != player.getUniqueId())
 			{
-				boolean alreadyBid = false;
-				for (Bid bid : auction.getBids())
-				{
-					if (bid.getBidder() == player)
-					{
-						alreadyBid = true;
-						break;
-					}
-				}
-				boolean isPlayerBidingOnOwnAuction = (auctioner == player);
-				if (!alreadyBid && auction.getSender() == auctioner && !isPlayerBidingOnOwnAuction)
-				{
-					bidOnAuction = auction;
-					break;
-				}
-				else if (alreadyBid)
-				{
-					src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid multiple times!"));
-					return CommandResult.success();
-				}
-				else if (isPlayerBidingOnOwnAuction)
-				{
-					src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid on your own auction!"));
-					return CommandResult.success();
-				}
-			}
+				boolean hasEnoughMoney = ItemAuction.economyService.getOrCreateAccount(player.getUniqueId()).get().getBalance(ItemAuction.economyService.getDefaultCurrency()).compareTo(BigDecimal.valueOf(price)) >= 0;
 
-			boolean hasEnoughMoney = ItemAuction.economyService.getOrCreateAccount(player.getUniqueId()).get().getBalance(ItemAuction.economyService.getDefaultCurrency()).compareTo(BigDecimal.valueOf(price)) >= 0;
+				if (hasEnoughMoney)
+				{
+					auction.get().getBids().removeIf(b -> b.getBidder().getUniqueId() == player.getUniqueId());
+					Sponge.getEventManager().post(new BidEvent(player, price, auction.get()));
+					src.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Bid sent."));
+				}
+				else
+				{
+					src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have enough money to create a bid for that sum of money!"));
+				}
 
-			if (hasEnoughMoney && bidOnAuction != null)
-			{
-				Sponge.getEventManager().post(new BidEvent(player, price, bidOnAuction));
-				src.sendMessage(Text.of(TextColors.GREEN, "Success! ", TextColors.WHITE, "Bid sent."));
 			}
-			else if (!hasEnoughMoney)
+			else if (!auction.isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have enough money to create a bid for that sum of money!"));
-				return CommandResult.success();
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "No auction found!"));
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Auction not found!"));
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid on your own auction!"));
 			}
 		}
 		else

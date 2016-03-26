@@ -1,51 +1,54 @@
-package io.github.hsyyid.itemauction.utils;
+package io.github.hsyyid.itemauction.util;
 
-import java.util.ArrayList;
-
+import com.google.common.collect.Lists;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public class Auction
 {
 	public Player sender;
-	public int price;
+	public BigDecimal price;
 	public int quantity;
 	public ItemStack itemStack;
-	public ArrayList<Bid> bids= new ArrayList<Bid>();
-	
-	public Auction(Player sender, int price, int quantity, ItemStack itemStack)
+	public List<Bid> bids;
+
+	public Auction(Player sender, BigDecimal price, int quantity, ItemStack itemStack)
 	{
 		this.sender = sender;
 		this.price = price;
 		this.quantity = quantity;
 		this.itemStack = itemStack;
+		this.bids = Lists.newArrayList();
 	}
-	
+
 	public Player getSender()
 	{
 		return sender;
 	}
-	
-	public int getPrice()
+
+	public BigDecimal getPrice()
 	{
 		return price;
 	}
-	
-	public ArrayList<Bid> getBids()
+
+	public List<Bid> getBids()
 	{
 		return bids;
 	}
-	
+
 	public void addBid(Bid bid)
 	{
 		bids.add(bid);
 	}
-	
+
 	public int getQuantity()
 	{
 		return quantity;
 	}
-	
+
 	public ItemStack getItemStack()
 	{
 		return itemStack;

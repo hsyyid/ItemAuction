@@ -1,30 +1,32 @@
-package io.github.hsyyid.itemauction.utils;
+package io.github.hsyyid.itemauction.util;
 
 import org.spongepowered.api.entity.living.player.Player;
+
+import java.math.BigDecimal;
 
 public class Bid
 {
 	private Player bidder;
-	private int price;
+	private BigDecimal price;
 	private Auction auction;
-	
-	public Bid(Player bidder, int price, Auction auction)
+
+	public Bid(Player bidder, BigDecimal price, Auction auction)
 	{
 		this.bidder = bidder;
 		this.price = price;
 		this.auction = auction;
 	}
-	
+
 	public Player getBidder()
 	{
 		return bidder;
 	}
-	
-	public int getPrice()
+
+	public BigDecimal getPrice()
 	{
 		return price;
 	}
-	
+
 	public Auction getAuction()
 	{
 		return auction;

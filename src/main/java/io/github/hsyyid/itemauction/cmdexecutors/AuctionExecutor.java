@@ -10,42 +10,34 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
-
-import java.util.Optional;
 
 public class AuctionExecutor implements CommandExecutor
 {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
-		int price = ctx.<Integer> getOne("price").get();
+		double price = ctx.<Double> getOne("price").get();
 
 		if (src instanceof Player)
 		{
 			if (price < 0)
 			{
-				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot create an auction with a negative number!"));
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot create an auction with a negative price!"));
 				return CommandResult.success();
 			}
 
 			Player player = (Player) src;
-			Optional<ItemStack> optionalItemInHand = player.getItemInHand();
-			ItemStack itemInHand = null;
 
-			if (optionalItemInHand.isPresent())
+			if (player.getItemInHand().isPresent())
 			{
-				itemInHand = optionalItemInHand.get();
-				Sponge.getEventManager().post(new AuctionEvent(player, itemInHand, price));
-
-				for (Player p : Sponge.getServer().getOnlinePlayers())
-				{
-					p.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + itemInHand.getQuantity() + " ", itemInHand.getItem().getName(), " for " + price + " dollars."));
-				}
+				ItemStack stack = player.getItemInHand().get();
+				Sponge.getEventManager().post(new AuctionEvent(player, stack, price));
+				MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getItem().getTranslation().get(), " for " + price + " dollars."));
 			}
 			else
 			{
 				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You aren't holding anything!"));
-				return CommandResult.success();
 			}
 		}
 		else

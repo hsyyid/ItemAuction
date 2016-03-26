@@ -1,22 +1,20 @@
 package io.github.hsyyid.itemauction;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.github.hsyyid.itemauction.cmdexecutors.AcceptBidExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.AuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.BidExecutor;
+import io.github.hsyyid.itemauction.cmdexecutors.ItemAuctionExecutor;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import io.github.hsyyid.itemauction.events.BidEvent;
-import io.github.hsyyid.itemauction.utils.Auction;
-import io.github.hsyyid.itemauction.utils.Bid;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import io.github.hsyyid.itemauction.util.Auction;
+import io.github.hsyyid.itemauction.util.Bid;
 import org.slf4j.Logger;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -26,19 +24,17 @@ import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
-@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.4")
+@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6")
 public class ItemAuction
 {
 	public static EconomyService economyService;
-	public static Game game;
-	public static ConfigurationNode config;
-	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
-	public static ArrayList<Auction> auctions = new ArrayList<Auction>();
+	public static List<Auction> auctions = Lists.newArrayList();
 
 	@Inject
 	private Logger logger;
@@ -48,64 +44,42 @@ public class ItemAuction
 		return logger;
 	}
 
-	@Inject
-	@DefaultConfig(sharedRoot = true)
-	private File dConfig;
-
-	@Inject
-	@DefaultConfig(sharedRoot = true)
-	private ConfigurationLoader<CommentedConfigurationNode> confManager;
-
 	@Listener
-	public void onServerInit(GameInitializationEvent event)
+	public void init(GameInitializationEvent event)
 	{
 		getLogger().info("ItemAuction loading...");
-		game = Sponge.getGame();
 
-		// Config File
-		try
-		{
-			if (!dConfig.exists())
-			{
-				dConfig.createNewFile();
-				config = confManager.load();
-				confManager.save(config);
-			}
-			configurationManager = confManager;
-			config = confManager.load();
+		HashMap<List<String>, CommandSpec> subcommands = Maps.newHashMap();
 
-		}
-		catch (IOException exception)
-		{
-			getLogger().error("The default configuration could not be loaded or created!");
-		}
-
-		CommandSpec auctionCommandSpec = CommandSpec.builder()
+		subcommands.put(Arrays.asList("auction"), CommandSpec.builder()
 			.description(Text.of("Auction Command"))
-			.permission("auction.use")
-			.arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("price"))))
+			.permission("itemauction.command.auction")
+			.arguments(GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("price"))))
 			.executor(new AuctionExecutor())
-			.build();
+			.build());
 
-		game.getCommandManager().register(this, auctionCommandSpec, "auction");
-
-		CommandSpec acceptBidCommandSpec = CommandSpec.builder()
+		subcommands.put(Arrays.asList("acceptbid"), CommandSpec.builder()
 			.description(Text.of("Accept Bid Command"))
-			.permission("bid.accept")
+			.permission("itemauction.command.acceptbid")
 			.arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
 			.executor(new AcceptBidExecutor())
-			.build();
+			.build());
 
-		game.getCommandManager().register(this, acceptBidCommandSpec, "acceptbid");
-
-		CommandSpec bidCommandSpec = CommandSpec.builder()
+		subcommands.put(Arrays.asList("bid"), CommandSpec.builder()
 			.description(Text.of("Bid Command"))
-			.permission("bid.use")
-			.arguments(GenericArguments.seq(GenericArguments.onlyOne(GenericArguments.player(Text.of("player")))), GenericArguments.onlyOne(GenericArguments.integer(Text.of("price"))))
+			.permission("itemauction.command.bid")
+			.arguments(GenericArguments.seq(GenericArguments.onlyOne(GenericArguments.player(Text.of("player")))), GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("price"))))
 			.executor(new BidExecutor())
+			.build());
+
+		CommandSpec itemAuctionCommandSpec = CommandSpec.builder()
+			.description(Text.of("ItemAuction Command"))
+			.permission("itemauction.command.use")
+			.executor(new ItemAuctionExecutor())
+			.children(subcommands)
 			.build();
 
-		game.getCommandManager().register(this, bidCommandSpec, "bid");
+		Sponge.getCommandManager().register(this, itemAuctionCommandSpec, "ia", "itemauction");
 
 		getLogger().info("-----------------------------");
 		getLogger().info("ItemAuction was made by HassanS6000!");
@@ -115,7 +89,7 @@ public class ItemAuction
 	}
 
 	@Listener
-	public void onPostInit(GamePostInitializationEvent event)
+	public void postInit(GamePostInitializationEvent event)
 	{
 		Optional<EconomyService> optionalEconomyService = Sponge.getServiceManager().provide(EconomyService.class);
 
@@ -130,30 +104,24 @@ public class ItemAuction
 	}
 
 	@Listener
-	public void auctionEventHandler(AuctionEvent event)
+	public void onAuction(AuctionEvent event)
 	{
-		Auction auction = new Auction(event.getSender(), event.getPrice(), event.getItemStack().getQuantity(), event.getItemStack());
+		Auction auction = new Auction(event.getSender(), new BigDecimal(event.getPrice()), event.getItemStack().getQuantity(), event.getItemStack());
 		auctions.add(auction);
 	}
 
 	@Listener
-	public void bidEventHandler(BidEvent event)
+	public void onBid(BidEvent event)
 	{
 		Auction auction = event.getAuction();
 		Player bidder = event.getBidder();
-		int price = event.getPrice();
 
-		Bid bid = new Bid(bidder, price, auction);
+		Bid bid = new Bid(bidder, new BigDecimal(event.getPrice()), auction);
 		auctions.remove(auction);
 		auction.addBid(bid);
 		auctions.add(auction);
 
-		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + price + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getItem().getName()));
+		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + event.getPrice() + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getItem().getName()));
 		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /acceptbid " + bidder.getName() + " to accept this bid."));
-	}
-
-	public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
-	{
-		return configurationManager;
 	}
 }

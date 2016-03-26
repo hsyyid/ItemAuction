@@ -12,7 +12,7 @@ public class AuctionEvent extends AbstractEvent implements Cancellable
 	private boolean cancelled = false;
 
 	private Player sender;
-	private int price;
+	private double price;
 	private ItemStack itemStack;
 
 	public Player getSender()
@@ -20,7 +20,7 @@ public class AuctionEvent extends AbstractEvent implements Cancellable
 		return sender;
 	}
 
-	public int getPrice()
+	public double getPrice()
 	{
 		return price;
 	}
@@ -40,7 +40,7 @@ public class AuctionEvent extends AbstractEvent implements Cancellable
 		cancelled = cancel;
 	}
 
-	public AuctionEvent(Player sender, ItemStack itemStack, int price)
+	public AuctionEvent(Player sender, ItemStack itemStack, double price)
 	{
 		this.sender = sender;
 		this.itemStack = itemStack;
