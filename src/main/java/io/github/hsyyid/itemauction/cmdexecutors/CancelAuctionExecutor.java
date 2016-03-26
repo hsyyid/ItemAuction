@@ -28,7 +28,7 @@ public class CancelAuctionExecutor implements CommandExecutor
 			{
 				ItemStack stack = auction.get().getItemStack();
 				ItemAuction.auctions.remove(auction.get());
-				MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is no longer auctioning " + stack.getQuantity() + " ", stack.getItem().getTranslation().get(), " for " + auction.get().getPrice() + " dollars."));
+				MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is no longer auctioning " + stack.getQuantity() + " ", stack.getTranslation().get(), "."));
 			}
 			else
 			{
