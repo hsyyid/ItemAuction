@@ -4,16 +4,14 @@ import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.utils.Auction;
 import io.github.hsyyid.itemauction.utils.Bid;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.source.CommandBlockSource;
-import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -32,14 +30,14 @@ public class AcceptBidExecutor implements CommandExecutor
 
 			Auction endedAuction = null;
 			Bid endedBid = null;
-			
+
 			for (Auction auction : ItemAuction.auctions)
 			{
 				if (auction.getSender() == player)
 				{
 					for (Bid bid : auction.getBids())
 					{
-						
+
 						if (bid.getBidder().getUniqueId() == bidder.getUniqueId())
 						{
 							endedBid = bid;
@@ -54,16 +52,18 @@ public class AcceptBidExecutor implements CommandExecutor
 			{
 				player.setItemInHand(null);
 				ItemAuction.auctions.remove(endedAuction);
+
 				for (Player p : server.getOnlinePlayers())
 				{
 					p.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.WHITE, player.getName() + " auction for " + endedAuction.getQuantity() + " " + endedAuction.getItemStack().getItem().getName() + " has ended."));
 				}
+
 				bidder.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.WHITE, "Your bid was accepted by " + player.getName() + "."));
 				bidder.setItemInHand(endedAuction.getItemStack());
 
 				BigDecimal price = new BigDecimal(endedBid.getPrice());
-				ItemAuction.economyService.getAccount(bidder.getUniqueId()).get().withdraw(ItemAuction.economyService.getDefaultCurrency(), price, Cause.of(Sponge.getPluginManager().getPlugin("ItemAuction").get()));
-				ItemAuction.economyService.getAccount(bidder.getUniqueId()).get().deposit(ItemAuction.economyService.getDefaultCurrency(), price, Cause.of(Sponge.getPluginManager().getPlugin("ItemAuction").get()));	
+				ItemAuction.economyService.getOrCreateAccount(bidder.getUniqueId()).get().withdraw(ItemAuction.economyService.getDefaultCurrency(), price, Cause.of(NamedCause.source(player)));
+				ItemAuction.economyService.getOrCreateAccount(bidder.getUniqueId()).get().deposit(ItemAuction.economyService.getDefaultCurrency(), price, Cause.of(NamedCause.source(player)));
 
 				src.sendMessage(Text.of(TextColors.GREEN, "Success! ", TextColors.WHITE, "Bid accepted."));
 			}
@@ -72,14 +72,11 @@ public class AcceptBidExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Bid not found!"));
 			}
 		}
-		else if (src instanceof ConsoleSource)
+		else
 		{
 			src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /acceptbid!"));
 		}
-		else if (src instanceof CommandBlockSource)
-		{
-			src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /acceptbid!"));
-		}
+
 		return CommandResult.success();
 	}
 }

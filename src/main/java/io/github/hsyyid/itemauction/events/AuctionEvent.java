@@ -1,9 +1,9 @@
 package io.github.hsyyid.itemauction.events;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -49,6 +49,6 @@ public class AuctionEvent extends AbstractEvent implements Cancellable
 
 	public Cause getCause()
 	{
-		return Cause.of(Sponge.getPluginManager().getPlugin("ItemAuction").get());
+		return Cause.of(NamedCause.source(this.sender));
 	}
 }

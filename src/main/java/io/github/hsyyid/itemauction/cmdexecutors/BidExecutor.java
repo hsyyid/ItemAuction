@@ -4,13 +4,11 @@ import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.utils.Auction;
 import io.github.hsyyid.itemauction.utils.Bid;
-import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.source.CommandBlockSource;
-import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -22,7 +20,6 @@ public class BidExecutor implements CommandExecutor
 {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
-		Game game = ItemAuction.game;
 		Player auctioner = ctx.<Player> getOne("player").get();
 		int price = ctx.<Integer> getOne("price").get();
 
@@ -66,11 +63,11 @@ public class BidExecutor implements CommandExecutor
 				}
 			}
 
-			boolean hasEnoughMoney = ItemAuction.economyService.getAccount(player.getUniqueId()).get().getBalance(ItemAuction.economyService.getDefaultCurrency()).compareTo(BigDecimal.valueOf(price)) >= 0;
+			boolean hasEnoughMoney = ItemAuction.economyService.getOrCreateAccount(player.getUniqueId()).get().getBalance(ItemAuction.economyService.getDefaultCurrency()).compareTo(BigDecimal.valueOf(price)) >= 0;
 
 			if (hasEnoughMoney && bidOnAuction != null)
 			{
-				game.getEventManager().post(new BidEvent(player, price, bidOnAuction));
+				Sponge.getEventManager().post(new BidEvent(player, price, bidOnAuction));
 				src.sendMessage(Text.of(TextColors.GREEN, "Success! ", TextColors.WHITE, "Bid sent."));
 			}
 			else if (!hasEnoughMoney)
@@ -83,14 +80,11 @@ public class BidExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Auction not found!"));
 			}
 		}
-		else if (src instanceof ConsoleSource)
+		else
 		{
 			src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /bid!"));
 		}
-		else if (src instanceof CommandBlockSource)
-		{
-			src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "Must be an in-game player to use /bid!"));
-		}
+
 		return CommandResult.success();
 	}
 }

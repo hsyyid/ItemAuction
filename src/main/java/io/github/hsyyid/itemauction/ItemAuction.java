@@ -25,21 +25,19 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.TeleportHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
-@Plugin(id = "ItemAuction", name = "ItemAuction", version = "0.4")
+@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.4")
 public class ItemAuction
 {
 	public static EconomyService economyService;
 	public static Game game;
 	public static ConfigurationNode config;
 	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
-	public static TeleportHelper helper;
 	public static ArrayList<Auction> auctions = new ArrayList<Auction>();
 
 	@Inject
@@ -62,9 +60,8 @@ public class ItemAuction
 	public void onServerInit(GameInitializationEvent event)
 	{
 		getLogger().info("ItemAuction loading...");
-		
 		game = Sponge.getGame();
-		helper = game.getTeleportHelper();
+
 		// Config File
 		try
 		{
@@ -91,7 +88,7 @@ public class ItemAuction
 			.build();
 
 		game.getCommandManager().register(this, auctionCommandSpec, "auction");
-		
+
 		CommandSpec acceptBidCommandSpec = CommandSpec.builder()
 			.description(Text.of("Accept Bid Command"))
 			.permission("bid.accept")
@@ -104,27 +101,25 @@ public class ItemAuction
 		CommandSpec bidCommandSpec = CommandSpec.builder()
 			.description(Text.of("Bid Command"))
 			.permission("bid.use")
-			.arguments(GenericArguments.seq(
-						GenericArguments.onlyOne(GenericArguments.player(Text.of("player")))),
-						GenericArguments.onlyOne(GenericArguments.integer(Text.of("price"))))
-						.executor(new BidExecutor())
-						.build();
+			.arguments(GenericArguments.seq(GenericArguments.onlyOne(GenericArguments.player(Text.of("player")))), GenericArguments.onlyOne(GenericArguments.integer(Text.of("price"))))
+			.executor(new BidExecutor())
+			.build();
 
-			game.getCommandManager().register(this, bidCommandSpec, "bid");
+		game.getCommandManager().register(this, bidCommandSpec, "bid");
 
-			getLogger().info("-----------------------------");
-			getLogger().info("ItemAuction was made by HassanS6000!");
-			getLogger().info("Have fun, and enjoy! :D");
-			getLogger().info("-----------------------------");
-			getLogger().info("ItemAuction loaded!");
+		getLogger().info("-----------------------------");
+		getLogger().info("ItemAuction was made by HassanS6000!");
+		getLogger().info("Have fun, and enjoy! :D");
+		getLogger().info("-----------------------------");
+		getLogger().info("ItemAuction loaded!");
 	}
-	
+
 	@Listener
 	public void onPostInit(GamePostInitializationEvent event)
 	{
 		Optional<EconomyService> optionalEconomyService = Sponge.getServiceManager().provide(EconomyService.class);
-		
-		if(optionalEconomyService.isPresent())
+
+		if (optionalEconomyService.isPresent())
 		{
 			economyService = optionalEconomyService.get();
 		}
@@ -140,23 +135,23 @@ public class ItemAuction
 		Auction auction = new Auction(event.getSender(), event.getPrice(), event.getItemStack().getQuantity(), event.getItemStack());
 		auctions.add(auction);
 	}
-	
+
 	@Listener
 	public void bidEventHandler(BidEvent event)
 	{
 		Auction auction = event.getAuction();
 		Player bidder = event.getBidder();
 		int price = event.getPrice();
-		
+
 		Bid bid = new Bid(bidder, price, auction);
 		auctions.remove(auction);
 		auction.addBid(bid);
 		auctions.add(auction);
-		
+
 		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + price + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getItem().getName()));
 		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /acceptbid " + bidder.getName() + " to accept this bid."));
 	}
-	
+
 	public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
 	{
 		return configurationManager;
