@@ -2,12 +2,15 @@ package io.github.hsyyid.itemauction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import io.github.hsyyid.itemauction.cmdexecutors.AcceptBidExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.AuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.BidExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.CancelAuctionExecutor;
+import io.github.hsyyid.itemauction.cmdexecutors.IgnoreAuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.ItemAuctionExecutor;
+import io.github.hsyyid.itemauction.cmdexecutors.ListAuctionExecutor;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.util.Auction;
@@ -30,12 +33,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.1")
+@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.2")
 public class ItemAuction
 {
 	public static EconomyService economyService;
 	public static List<Auction> auctions = Lists.newArrayList();
+	public static Set<UUID> ignorePlayers = Sets.newHashSet();
 
 	@Inject
 	private Logger logger;
@@ -57,6 +63,18 @@ public class ItemAuction
 			.permission("itemauction.command.auction")
 			.arguments(GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("price"))))
 			.executor(new AuctionExecutor())
+			.build());
+		
+		subcommands.put(Arrays.asList("ignoreauction", "ignoreauctions"), CommandSpec.builder()
+			.description(Text.of("Ignore Auction Command"))
+			.permission("itemauction.command.ignoreauction")
+			.executor(new IgnoreAuctionExecutor())
+			.build());
+
+		subcommands.put(Arrays.asList("list", "listauctions"), CommandSpec.builder()
+			.description(Text.of("List Auctions Command"))
+			.permission("itemauction.command.list")
+			.executor(new ListAuctionExecutor())
 			.build());
 
 		subcommands.put(Arrays.asList("cancelauction", "cauc", "cancelauc"), CommandSpec.builder()

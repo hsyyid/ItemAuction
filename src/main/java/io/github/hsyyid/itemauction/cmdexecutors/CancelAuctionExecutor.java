@@ -2,6 +2,7 @@ package io.github.hsyyid.itemauction.cmdexecutors;
 
 import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.util.Auction;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -11,9 +12,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class CancelAuctionExecutor implements CommandExecutor
 {
@@ -28,7 +31,17 @@ public class CancelAuctionExecutor implements CommandExecutor
 			{
 				ItemStack stack = auction.get().getItemStack();
 				ItemAuction.auctions.remove(auction.get());
-				MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is no longer auctioning " + stack.getQuantity() + " ", stack.getTranslation().get(), "."));
+				MutableMessageChannel messageChannel = MessageChannel.TO_ALL.asMutable();
+
+				for (UUID uuid : ItemAuction.ignorePlayers)
+				{
+					if (Sponge.getServer().getPlayer(uuid).isPresent())
+					{
+						messageChannel.removeMember(Sponge.getServer().getPlayer(uuid).get());
+					}
+				}
+
+				messageChannel.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is no longer auctioning " + stack.getQuantity() + " ", stack.getTranslation().get(), "."));
 			}
 			else
 			{

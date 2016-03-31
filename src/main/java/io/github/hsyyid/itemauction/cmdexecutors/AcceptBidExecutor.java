@@ -3,6 +3,7 @@ package io.github.hsyyid.itemauction.cmdexecutors;
 import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.util.Auction;
 import io.github.hsyyid.itemauction.util.Bid;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -15,9 +16,11 @@ import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class AcceptBidExecutor implements CommandExecutor
 {
@@ -42,7 +45,17 @@ public class AcceptBidExecutor implements CommandExecutor
 					if (transactionResult.getResult() == ResultType.SUCCESS)
 					{
 						ItemAuction.auctions.remove(auction.get());
-						MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, player.getName() + " auction for " + auction.get().getQuantity() + " " + auction.get().getItemStack().getItem().getTranslation().get() + " has ended."));
+						MutableMessageChannel messageChannel = MessageChannel.TO_ALL.asMutable();
+
+						for (UUID uuid : ItemAuction.ignorePlayers)
+						{
+							if (Sponge.getServer().getPlayer(uuid).isPresent())
+							{
+								messageChannel.removeMember(Sponge.getServer().getPlayer(uuid).get());
+							}
+						}
+
+						messageChannel.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, player.getName() + " auction for " + auction.get().getQuantity() + " " + auction.get().getItemStack().getItem().getTranslation().get() + " has ended."));
 						bidder.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Your bid was accepted by " + player.getName() + "."));
 						player.setItemInHand(null);
 						bidder.getInventory().offer(auction.get().getItemStack());

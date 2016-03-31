@@ -12,7 +12,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.UUID;
 
 public class AuctionExecutor implements CommandExecutor
 {
@@ -35,7 +38,17 @@ public class AuctionExecutor implements CommandExecutor
 				{
 					ItemStack stack = player.getItemInHand().get();
 					Sponge.getEventManager().post(new AuctionEvent(player, stack, price));
-					MessageChannel.TO_ALL.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getTranslation().get(), " for " + price + " dollars."));
+					MutableMessageChannel messageChannel = MessageChannel.TO_ALL.asMutable();
+
+					for (UUID uuid : ItemAuction.ignorePlayers)
+					{
+						if (Sponge.getServer().getPlayer(uuid).isPresent())
+						{
+							messageChannel.removeMember(Sponge.getServer().getPlayer(uuid).get());
+						}
+					}
+
+					messageChannel.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.RED, player.getName(), TextColors.GOLD, " is now auctioning " + stack.getQuantity() + " ", stack.getTranslation().get(), " for " + price + " dollars."));
 				}
 				else
 				{
