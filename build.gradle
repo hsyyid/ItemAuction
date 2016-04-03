@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
-version = '0.6.2'
+version = '0.6.3'
 group = "io.github.hsyyid"
 archivesBaseName = "ItemAuction"
 

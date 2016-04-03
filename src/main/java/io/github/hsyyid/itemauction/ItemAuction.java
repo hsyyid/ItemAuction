@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.2")
+@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.3")
 public class ItemAuction
 {
 	public static EconomyService economyService;
