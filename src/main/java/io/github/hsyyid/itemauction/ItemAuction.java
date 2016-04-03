@@ -26,6 +26,8 @@ import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
@@ -86,7 +88,6 @@ public class ItemAuction
 		subcommands.put(Arrays.asList("acceptbid"), CommandSpec.builder()
 			.description(Text.of("Accept Bid Command"))
 			.permission("itemauction.command.acceptbid")
-			.arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
 			.executor(new AcceptBidExecutor())
 			.build());
 
@@ -149,7 +150,16 @@ public class ItemAuction
 		auction.addBid(bid);
 		ItemAuction.auctions.add(auction);
 
-		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, bidder.getName() + " has bid " + event.getPrice() + " dollars for your " + auction.getQuantity() + " " + auction.getItemStack().getTranslation().get()));
-		auction.getSender().sendMessage(Text.of(TextColors.GREEN, "[ItemAuction] ", TextColors.YELLOW, "Do /ia acceptbid " + bidder.getName() + " to accept this bid."));
+		MutableMessageChannel messageChannel = MessageChannel.TO_ALL.asMutable();
+
+		for (UUID uuid : ItemAuction.ignorePlayers)
+		{
+			if (Sponge.getServer().getPlayer(uuid).isPresent())
+			{
+				messageChannel.removeMember(Sponge.getServer().getPlayer(uuid).get());
+			}
+		}
+
+		messageChannel.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, bidder.getName() + " has raised the bid to " + event.getPrice() + " " + ItemAuction.economyService.getDefaultCurrency().getPluralDisplayName().toPlain() + " for " + auction.getSender().getName() + "'s " + auction.getQuantity() + " " + auction.getItemStack().getTranslation().get()));
 	}
 }

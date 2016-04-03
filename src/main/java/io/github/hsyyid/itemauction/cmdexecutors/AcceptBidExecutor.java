@@ -26,8 +26,6 @@ public class AcceptBidExecutor implements CommandExecutor
 {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
-		Player bidder = ctx.<Player> getOne("player").get();
-
 		if (src instanceof Player)
 		{
 			Player player = (Player) src;
@@ -36,10 +34,12 @@ public class AcceptBidExecutor implements CommandExecutor
 
 			if (auction.isPresent())
 			{
-				Optional<Bid> bid = auction.get().getBids().stream().filter(b -> b.getBidder().getUniqueId() == bidder.getUniqueId()).findAny();
+				double highestBid = auction.get().getBids().stream().mapToDouble(i -> i.getPrice().doubleValue()).max().getAsDouble();
+				Optional<Bid> bid = auction.get().getBids().stream().filter(b -> b.getPrice().doubleValue() == highestBid).findAny();
 
 				if (bid.isPresent() && player.getItemInHand().isPresent() && player.getItemInHand().get().getQuantity() == auction.get().getItemStack().getQuantity() && player.getItemInHand().get().getItem() == auction.get().getItemStack().getItem())
 				{
+					Player bidder = bid.get().getBidder();
 					TransactionResult transactionResult = ItemAuction.economyService.getOrCreateAccount(bidder.getUniqueId()).get().transfer(ItemAuction.economyService.getOrCreateAccount(player.getUniqueId()).get(), ItemAuction.economyService.getDefaultCurrency(), bid.get().getPrice(), Cause.of(NamedCause.source(player)));
 
 					if (transactionResult.getResult() == ResultType.SUCCESS)

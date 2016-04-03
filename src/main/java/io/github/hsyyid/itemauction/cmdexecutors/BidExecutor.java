@@ -27,10 +27,16 @@ public class BidExecutor implements CommandExecutor
 		{
 			Player player = (Player) src;
 			Optional<Auction> auction = ItemAuction.auctions.stream().filter(a -> a.getSender().getUniqueId() == auctioneer.getUniqueId()).findAny();
-
+			double highestBid = auction.get().getBids().stream().mapToDouble(i -> i.getPrice().doubleValue()).max().getAsDouble();
+			
 			if (price < 0)
 			{
 				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid a negative number!"));
+				return CommandResult.success();
+			}
+			else if(price < highestBid)
+			{
+				src.sendMessage(Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "You cannot bid less than the highest bid (" + highestBid + ")."));
 				return CommandResult.success();
 			}
 
