@@ -34,7 +34,7 @@ public class AcceptBidExecutor implements CommandExecutor
 
 			if (auction.isPresent())
 			{
-				double highestBid = auction.get().getBids().stream().mapToDouble(i -> i.getPrice().doubleValue()).max().getAsDouble();
+				double highestBid = auction.get().getBids().stream().mapToDouble(i -> i.getPrice().doubleValue()).max().orElse(-15);
 				Optional<Bid> bid = auction.get().getBids().stream().filter(b -> b.getPrice().doubleValue() == highestBid).findAny();
 
 				if (bid.isPresent() && player.getItemInHand().isPresent() && player.getItemInHand().get().getQuantity() == auction.get().getItemStack().getQuantity() && player.getItemInHand().get().getItem() == auction.get().getItemStack().getItem())
