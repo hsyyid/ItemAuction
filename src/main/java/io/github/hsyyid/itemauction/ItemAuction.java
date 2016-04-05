@@ -11,14 +11,17 @@ import io.github.hsyyid.itemauction.cmdexecutors.CancelAuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.IgnoreAuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.ItemAuctionExecutor;
 import io.github.hsyyid.itemauction.cmdexecutors.ListAuctionExecutor;
+import io.github.hsyyid.itemauction.config.Config;
 import io.github.hsyyid.itemauction.events.AuctionEvent;
 import io.github.hsyyid.itemauction.events.BidEvent;
 import io.github.hsyyid.itemauction.util.Auction;
 import io.github.hsyyid.itemauction.util.Bid;
+import io.github.hsyyid.itemauction.util.Utils;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -30,7 +33,10 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +44,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.3")
+@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.4")
 public class ItemAuction
 {
+	private static ItemAuction instance;
 	public static EconomyService economyService;
 	public static List<Auction> auctions = Lists.newArrayList();
 	public static Set<UUID> ignorePlayers = Sets.newHashSet();
+
+	public static ItemAuction getInstance()
+	{
+		return instance;
+	}
 
 	@Inject
 	private Logger logger;
@@ -53,10 +65,36 @@ public class ItemAuction
 		return logger;
 	}
 
+	@Inject
+	@ConfigDir(sharedRoot = false)
+	private Path configDir;
+
+	public Path getConfigDir()
+	{
+		return configDir;
+	}
+
 	@Listener
 	public void init(GameInitializationEvent event)
 	{
+		instance = this;
 		getLogger().info("ItemAuction loading...");
+
+		// Create Config Directory
+		if (!Files.exists(configDir))
+		{
+			try
+			{
+				Files.createDirectories(configDir);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		// Create config.conf
+		Config.getConfig().setup();
 
 		HashMap<List<String>, CommandSpec> subcommands = Maps.newHashMap();
 
@@ -66,7 +104,7 @@ public class ItemAuction
 			.arguments(GenericArguments.onlyOne(GenericArguments.doubleNum(Text.of("price"))))
 			.executor(new AuctionExecutor())
 			.build());
-		
+
 		subcommands.put(Arrays.asList("ignoreauction", "ignoreauctions"), CommandSpec.builder()
 			.description(Text.of("Ignore Auction Command"))
 			.permission("itemauction.command.ignoreauction")
@@ -98,14 +136,31 @@ public class ItemAuction
 			.executor(new BidExecutor())
 			.build());
 
-		CommandSpec itemAuctionCommandSpec = CommandSpec.builder()
-			.description(Text.of("ItemAuction Command"))
-			.permission("itemauction.command.use")
-			.executor(new ItemAuctionExecutor())
-			.children(subcommands)
-			.build();
+		if (Utils.shouldRegisterAsSubcommands())
+		{
+			CommandSpec itemAuctionCommandSpec = CommandSpec.builder()
+				.description(Text.of("ItemAuction Command"))
+				.permission("itemauction.command.use")
+				.executor(new ItemAuctionExecutor())
+				.children(subcommands)
+				.build();
 
-		Sponge.getCommandManager().register(this, itemAuctionCommandSpec, "ia", "itemauction");
+			Sponge.getCommandManager().register(this, itemAuctionCommandSpec, "ia", "itemauction");
+		}
+		else
+		{
+			subcommands.forEach((k, v) -> {
+				Sponge.getCommandManager().register(ItemAuction.getInstance(), v, k);
+			});
+
+			CommandSpec itemAuctionCommandSpec = CommandSpec.builder()
+				.description(Text.of("ItemAuction Command"))
+				.permission("itemauction.command.use")
+				.executor(new ItemAuctionExecutor())
+				.build();
+
+			Sponge.getCommandManager().register(this, itemAuctionCommandSpec, "ia", "itemauction");
+		}
 
 		getLogger().info("-----------------------------");
 		getLogger().info("ItemAuction was made by HassanS6000!");
