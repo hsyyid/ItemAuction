@@ -8,6 +8,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
@@ -34,9 +35,9 @@ public class AuctionExecutor implements CommandExecutor
 
 			if (!ItemAuction.auctions.stream().filter(a -> a.getSender().getUniqueId() == player.getUniqueId()).findAny().isPresent())
 			{
-				if (player.getItemInHand().isPresent())
+				if (player.getItemInHand(HandTypes.MAIN_HAND).isPresent())
 				{
-					ItemStack stack = player.getItemInHand().get();
+					ItemStack stack = player.getItemInHand(HandTypes.MAIN_HAND).get();
 					Sponge.getEventManager().post(new AuctionEvent(player, stack, price));
 					MutableMessageChannel messageChannel = MessageChannel.TO_ALL.asMutable();
 
