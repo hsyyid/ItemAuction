@@ -16,6 +16,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
@@ -61,7 +62,7 @@ public class AcceptBidExecutor implements CommandExecutor
 
 						messageChannel.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, player.getName() + " auction for " + auction.get().getQuantity() + " " + auction.get().getItemStack().getItem().getTranslation().get() + " has ended."));
 						bidder.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Your bid was accepted by " + player.getName() + "."));
-						player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.builder().build());
+						player.setItemInHand(HandTypes.MAIN_HAND, null);
 						bidder.getInventory().offer(auction.get().getItemStack());
 						src.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Bid accepted."));
 					}
