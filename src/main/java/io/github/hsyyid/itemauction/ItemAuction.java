@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "io.github.hsyyid.itemauction", name = "ItemAuction", version = "0.6.4")
+@Plugin(id = "itemauction", name = "ItemAuction", description = "A simple Sponge plugin that adds economy and the auctioning of items!", version = "0.6.4")
 public class ItemAuction
 {
 	private static ItemAuction instance;

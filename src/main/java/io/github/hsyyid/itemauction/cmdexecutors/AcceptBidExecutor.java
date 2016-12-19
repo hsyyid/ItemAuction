@@ -4,14 +4,19 @@ import io.github.hsyyid.itemauction.ItemAuction;
 import io.github.hsyyid.itemauction.util.Auction;
 import io.github.hsyyid.itemauction.util.Bid;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
@@ -37,7 +42,7 @@ public class AcceptBidExecutor implements CommandExecutor
 				double highestBid = auction.get().getBids().stream().mapToDouble(i -> i.getPrice().doubleValue()).max().orElse(-15);
 				Optional<Bid> bid = auction.get().getBids().stream().filter(b -> b.getPrice().doubleValue() == highestBid).findAny();
 
-				if (bid.isPresent() && player.getItemInHand().isPresent() && player.getItemInHand().get().getQuantity() == auction.get().getItemStack().getQuantity() && player.getItemInHand().get().getItem() == auction.get().getItemStack().getItem())
+				if (bid.isPresent() && player.getItemInHand(HandTypes.MAIN_HAND).isPresent() && player.getItemInHand(HandTypes.MAIN_HAND).get().getQuantity() == auction.get().getItemStack().getQuantity() && player.getItemInHand(HandTypes.MAIN_HAND).get().getItem() == auction.get().getItemStack().getItem())
 				{
 					Player bidder = bid.get().getBidder();
 					TransactionResult transactionResult = ItemAuction.economyService.getOrCreateAccount(bidder.getUniqueId()).get().transfer(ItemAuction.economyService.getOrCreateAccount(player.getUniqueId()).get(), ItemAuction.economyService.getDefaultCurrency(), bid.get().getPrice(), Cause.of(NamedCause.source(player)));
@@ -57,7 +62,7 @@ public class AcceptBidExecutor implements CommandExecutor
 
 						messageChannel.send(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, player.getName() + " auction for " + auction.get().getQuantity() + " " + auction.get().getItemStack().getItem().getTranslation().get() + " has ended."));
 						bidder.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Your bid was accepted by " + player.getName() + "."));
-						player.setItemInHand(null);
+						player.setItemInHand(HandTypes.MAIN_HAND, null);
 						bidder.getInventory().offer(auction.get().getItemStack());
 						src.sendMessage(Text.of(TextColors.GREEN, "[ItemAuction]: ", TextColors.YELLOW, "Bid accepted."));
 					}
