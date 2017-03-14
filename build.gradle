@@ -2,16 +2,9 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
-version = '0.6.4'
+version = '0.6.5'
 group = "io.github.hsyyid"
 archivesBaseName = "ItemAuction"
-
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'ItemAuction',
-                   'Implementation-Version': version
-    }
-}
 
 repositories {
     mavenCentral()
@@ -22,17 +15,5 @@ repositories {
 }
 
 dependencies {
-    compile "org.spongepowered:spongeapi:4.0.1"
-}
-
-test {
-    systemProperties 'property': 'value'
-}
-
-uploadArchives {
-    repositories {
-       flatDir {
-           dirs 'repos'
-       }
-    }
+    compile "org.spongepowered:spongeapi:5.1.0-SNAPSHOT"
 }
